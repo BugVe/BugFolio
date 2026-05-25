@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pentest@kali: ~/resume</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --terminal-bg: #0d0d0d;
+            --text-color: #00ff00; 
+            --prompt-color: #8833ff; 
+            --dir-color: #00aaff;
+            --accent-color: #ff5555;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 20px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .terminal-window {
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--terminal-bg);
+            border-radius: 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            border: 1px solid #333;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            background-color: #222;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #bbb;
+            border-bottom: 1px solid #333;
+        }
+
+        .buttons { display: flex; gap: 8px; margin-right: 15px; }
+        .btn { width: 12px; height: 12px; border-radius: 50%; }
+        .close { background-color: #ff5f56; }
+        .minimize { background-color: #ffbd2e; }
+        .maximize { background-color: #27c93f; }
+
+        .terminal-body {
+            padding: 20px;
+            height: 500px;
+            overflow-y: auto;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .output-line { margin-bottom: 8px; white-space: pre-wrap; }
+        .input-line { display: flex; align-items: center; }
+        .prompt { color: var(--prompt-color); font-weight: bold; margin-right: 8px; }
+        .directory { color: var(--dir-color); }
+        
+        .cmd-input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            flex-grow: 1;
+        }
+        .accent { color: var(--accent-color); }
+    </style>
+</head>
+<body>
+
+<div class="terminal-window">
+    <div class="top-bar">
+        <div class="buttons"><div class="btn close"></div><div class="btn minimize"></div><div class="btn maximize"></div></div>
+        <div class="title">pentest@kali: ~/resume — zsh</div>
+    </div>
+    
+    <div class="terminal-body" id="terminalBody">
+        <div class="output-line"># ──────────────────────────────────────────────────</div>
+        <div class="output-line"># RESUME :: Penetration Tester / Bug Bounty Hunter</div>
+        <div class="output-line"># Type <span class="accent">'help'</span> to interact with the Python engine.</div>
+        <div class="output-line"># ──────────────────────────────────────────────────</div>
+        
+        <div id="history"></div>
+
+        <div class="input-line">
+            <span class="prompt">pentest@kali:<span class="directory">~/resume</span>$</span>
+            <input type="text" id="cmdInput" class="cmd-input" autofocus autocomplete="off" spellcheck="false">
+        </div>
+    </div>
+</div>
+
+<script>
+    const cmdInput = document.getElementById('cmdInput');
+    const history = document.getElementById('history');
+    const terminalBody = document.getElementById('terminalBody');
+
+    cmdInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const input = cmdInput.value.trim();
+            if (input === '') return;
+
+            // Echo client input command safely
+            const cmdEcho = document.createElement('div');
+            cmdEcho.className = 'output-line';
+            cmdEcho.innerHTML = `<span class="prompt">pentest@kali:<span class="directory">~/resume</span>$</span> ${escapeHTML(input)}`;
+            history.appendChild(cmdEcho);
+            cmdInput.value = '';
+
+            if (input.toLowerCase() === 'clear') {
+                history.innerHTML = '';
+                return;
+            }
+
+            // Route execution securely to Python Backend
+            fetch('/api/terminal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: input })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const response = document.createElement('div');
+                response.className = 'output-line';
+                response.innerHTML = data.output;
+                history.appendChild(response);
+                terminalBody.scrollTop = terminalBody.scrollHeight;
+            })
+            .catch(() => {
+                const err = document.createElement('div');
+                err.className = 'output-line accent';
+                err.innerHTML = 'Error: Remote connection to Python backend failed.';
+                history.appendChild(err);
+            });
+        }
+    });
+
+    function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+    }
+
+    terminalBody.addEventListener('click', () => cmdInput.focus());
+</script>
+</body>
+</html>
