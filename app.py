@@ -19,8 +19,8 @@ class Project(db.Model):
 
 # Explicit Hardcoded Content Registry (Strictly kills file system access vectors)
 SAFE_FILES = {
-    "contact.txt": "Email     : you@email.com\nLocation  : Ghaziabad, UP, IN\nGitHub    : github.com/yourhandle\nHackerOne : hackerone.com/yourhandle <span style='color:#ff5555'>[ACTIVE]</span>",
-    "summary.txt": "Aspiring penetration tester with hands-on bug bounty experience on Dell and Starbucks. Skilled in web application security, OWASP Top 10, and security hardening.",
+    "contact.txt": "Email     : bugve6@gmail.com\nLocation  : Mirzapur, UP, IN\nGitHub    : github.com/BugVe\nHackerOne : hackerone.com/bugve <span style='color:#ff5555'>[ACTIVE]</span>",
+    "summary.txt": "Results-driven Cyber Security Enthusiast and active Bug Bounty Hunter specializing in Web Application Penetration Testing. Proven track record of identifying critical security flaws—including subdomain takeovers and WAF bypasses—within enterprise-scale infrastructure. Combines strong development foundations in Python and SQL with a comprehensive understanding of offensive security testing methodologies and the OWASP Top 10. Adept at conducting thorough threat modeling, analyzing web traffic, and writing actionable vulnerability disclosure reports. Eager to bring a rigorous, security-first testing approach to a dedicated security analyst or penetration testing team.",
     "bug_bounty/findings.log": "<span style='color:#ff5555'>[HIGH]</span> Dell — Subdomain Takeover\n└─ Identified vulnerability exposing infrastructure to hijacking.\n<span style='color:#ff5555'>[MEDIUM]</span> Starbucks — WAF Bypass\n└─ Bypassed active Web Application Firewall protections."
 }
 
