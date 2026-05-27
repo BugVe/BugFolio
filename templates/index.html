@@ -3,45 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bugfolio@kali: ~/resume</title>
+    <title>Anshu | Security Researcher</title>
     <style>
         :root {
-            --bg-color: #1a1a1a;
+            --bg-color: #060606;
             --terminal-bg: #0d0d0d;
-            --text-color: #00ff00; 
+            --text-green: #00ff00; 
+            --text-grey: #888;
+            --border-color: #222;
             --prompt-color: #8833ff; 
             --dir-color: #00aaff;
             --accent-color: #ff5555;
+            --grid-line: rgba(255, 255, 255, 0.02);
         }
 
+        /* --- BACKGROUND & LAYOUT --- */
         body {
             background-color: var(--bg-color);
-            color: var(--text-color);
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--text-grey);
             font-family: 'Courier New', Courier, monospace;
-            margin: 20px;
-            padding: 0;
+            margin: 0;
+            padding: 60px 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
 
+        /* --- UPPER HEADER SECTION --- */
+        .hero-section {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .badge {
+            display: inline-block;
+            border: 1px solid var(--text-green);
+            color: var(--text-green);
+            background: rgba(0, 255, 0, 0.05);
+            padding: 6px 14px;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+        }
+
+        .hero-name {
+            font-family: 'Arial Black', Impact, sans-serif;
+            font-size: 5.5rem;
+            color: var(--text-green);
+            margin: 0;
+            line-height: 1;
+            letter-spacing: -2px;
+            text-transform: capitalize;
+        }
+
+        .hero-subtitle {
+            margin: 20px 0 40px;
+            font-size: 14px;
+        }
+
+        .highlight-blue {
+            color: #00aaff;
+            text-decoration: none;
+        }
+
+        .stats-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background-color: #0a0a0a;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            flex: 1;
+            padding: 20px 10px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: #444;
+        }
+
+        .stat-value {
+            color: var(--text-green);
+            font-family: 'Arial Black', sans-serif;
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- TERMINAL SECTION --- */
         .terminal-window {
             width: 100%;
             max-width: 900px;
             background-color: var(--terminal-bg);
             border-radius: 6px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-            border: 1px solid #333;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            border: 1px solid var(--border-color);
             overflow: hidden;
+            margin-bottom: 50px;
         }
 
         .top-bar {
-            background-color: #222;
+            background-color: #151515;
             padding: 10px;
             display: flex;
             align-items: center;
-            font-size: 14px;
-            color: #bbb;
-            border-bottom: 1px solid #333;
+            font-size: 13px;
+            color: #888;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .buttons { display: flex; gap: 8px; margin-right: 15px; }
@@ -52,10 +138,11 @@
 
         .terminal-body {
             padding: 20px;
-            height: 500px;
+            height: 450px;
             overflow-y: auto;
-            font-size: 15px;
-            line-height: 1.4;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-green);
         }
 
         .output-line { margin-bottom: 8px; white-space: pre-wrap; }
@@ -73,81 +160,148 @@
             flex-grow: 1;
         }
         .accent { color: var(--accent-color); }
+
+        /* --- CONTACT FOOTER SECTION --- */
+        .footer-section {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            padding-top: 20px;
+        }
+
+        .footer-text {
+            color: #444;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .stats-grid { flex-wrap: wrap; }
+            .stat-card { min-width: 40%; }
+            .hero-name { font-size: 4rem; }
+        }
     </style>
 </head>
 <body>
 
-<div class="terminal-window">
-    <div class="top-bar">
-        <div class="buttons"><div class="btn close"></div><div class="btn minimize"></div><div class="btn maximize"></div></div>
-        <div class="title">bugfolio@kali: ~/resume — zsh</div>
-    </div>
-    
-    <div class="terminal-body" id="terminalBody">
-        <div class="output-line"># ──────────────────────────────────────────────────</div>
-        <div class="output-line"># PORTFOLIO :: Anshu Vishwakarma</div>
-        <div class="output-line"># Type <span class="accent">'help'</span> to interact with the Python engine.</div>
-        <div class="output-line"># ──────────────────────────────────────────────────</div>
+    <!-- 1. UPPER SECTION -->
+    <div class="hero-section">
+        <div class="badge">▶BugFolio</div>
         
-        <div id="history"></div>
-
-        <div class="input-line">
-            <span class="prompt">bugfolio@kali:<span class="directory">~/resume</span>$</span>
-            <input type="text" id="cmdInput" class="cmd-input" autofocus autocomplete="off" spellcheck="false">
+        <h1 class="hero-name">Anshu</h1>
+        
+        <div class="hero-subtitle">
+            Web Security  &nbsp;·&nbsp; <span class="highlight-blue">Linkedin + Fiverr + Upwork</span> &nbsp;·&nbsp; Bug Bounty + Freelancing
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">3</div>
+                <div class="stat-label">Platforms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">BCA</div>
+                <div class="stat-label">Qualification</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">H1 · BC</div>
+                <div class="stat-label">Bug Bounty + Freelance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">Open for Jobs</div>
+                <div class="stat-label">Hire Me</div>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    const cmdInput = document.getElementById('cmdInput');
-    const history = document.getElementById('history');
-    const terminalBody = document.getElementById('terminalBody');
+    <!-- 2. TERMINAL SECTION -->
+    <div class="terminal-window">
+        <div class="top-bar">
+            <div class="buttons">
+                <div class="btn close"></div>
+                <div class="btn minimize"></div>
+                <div class="btn maximize"></div>
+            </div>
+            <div class="title">bugfolio@kali: ~/resume — zsh</div>
+        </div>
+        
+        <div class="terminal-body" id="terminalBody">
+            <div class="output-line"># ──────────────────────────────────────────────────</div>
+            <div class="output-line"># PORTFOLIO :: Anshu Vishwakarma</div>
+            <div class="output-line"># Type <span class="accent">'help'</span> to interact with the Python engine.</div>
+            <div class="output-line"># ──────────────────────────────────────────────────</div>
+            
+            <div id="history"></div>
 
-    cmdInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            const input = cmdInput.value.trim();
-            if (input === '') return;
+            <div class="input-line">
+                <span class="prompt">bugfolio@kali:<span class="directory">~/resume</span>$</span>
+                <input type="text" id="cmdInput" class="cmd-input" autofocus autocomplete="off" spellcheck="false">
+            </div>
+        </div>
+    </div>
 
-            // Echo client input command safely
-            const cmdEcho = document.createElement('div');
-            cmdEcho.className = 'output-line';
-            cmdEcho.innerHTML = `<span class="prompt">pentest@kali:<span class="directory">~/resume</span>$</span> ${escapeHTML(input)}`;
-            history.appendChild(cmdEcho);
-            cmdInput.value = '';
+    <!-- 3. CONTACT FOOTER SECTION -->
+    <div class="footer-section">
+        <a href="mailto:your_email@example.com" style="text-decoration: none;">
+            <div class="badge" style="cursor: pointer;">▶ bugve6@gmail.com</div>
+        </a>
+        
+        <div class="footer-text">
+            Built by Anshu &nbsp;·&nbsp; BCA Graduate &nbsp;·&nbsp; HackerOne & Bugcrowd & Freelance
+        </div>
+    </div>
 
-            if (input.toLowerCase() === 'clear') {
-                history.innerHTML = '';
-                return;
+    <!-- TERMINAL SCRIPT (Unchanged logic, just keeping it working) -->
+    <script>
+        const cmdInput = document.getElementById('cmdInput');
+        const history = document.getElementById('history');
+        const terminalBody = document.getElementById('terminalBody');
+
+        cmdInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const input = cmdInput.value.trim();
+                if (input === '') return;
+
+
+                const cmdEcho = document.createElement('div');
+                cmdEcho.className = 'output-line';
+                cmdEcho.innerHTML = `<span class="prompt">bugfolio@kali:<span class="directory">~/resume</span>$</span> ${escapeHTML(input)}`;
+                history.appendChild(cmdEcho);
+                cmdInput.value = '';
+
+                if (input.toLowerCase() === 'clear') {
+                    history.innerHTML = '';
+                    return;
+                }
+
+                fetch('/api/terminal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: input })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const response = document.createElement('div');
+                    response.className = 'output-line';
+                    response.innerHTML = data.output;
+                    history.appendChild(response);
+                    terminalBody.scrollTop = terminalBody.scrollHeight;
+                })
+                .catch(() => {
+                    const err = document.createElement('div');
+                    err.className = 'output-line accent';
+                    err.innerHTML = 'Error: Remote connection to Python backend failed.';
+                    history.appendChild(err);
+                });
             }
+        });
 
-            // Route execution securely to Python Backend
-            fetch('/api/terminal', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ command: input })
-            })
-            .then(res => res.json())
-            .then(data => {
-                const response = document.createElement('div');
-                response.className = 'output-line';
-                response.innerHTML = data.output;
-                history.appendChild(response);
-                terminalBody.scrollTop = terminalBody.scrollHeight;
-            })
-            .catch(() => {
-                const err = document.createElement('div');
-                err.className = 'output-line accent';
-                err.innerHTML = 'Error: Remote connection to Python backend failed.';
-                history.appendChild(err);
-            });
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
-    });
 
-    function escapeHTML(str) {
-        return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
-    }
-
-    terminalBody.addEventListener('click', () => cmdInput.focus());
-</script>
+        terminalBody.addEventListener('click', () => cmdInput.focus());
+    </script>
 </body>
 </html>
