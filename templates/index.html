@@ -3,271 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anshu | Security Researcher</title>
+    <title>Anshu | Security Portfolio</title>
     <style>
         :root {
             --bg-color: #060606;
-            --terminal-bg: #0d0d0d;
+            --card-bg: #0d0d0d;
             --text-green: #00ff00; 
-            --text-grey: #888;
+            --text-grey: #a0a0a0;
             --border-color: #222;
-            --prompt-color: #8833ff; 
-            --dir-color: #00aaff;
-            --accent-color: #ff5555;
             --grid-line: rgba(255, 255, 255, 0.02);
         }
 
-        /* --- BACKGROUND & LAYOUT --- */
         body {
             background-color: var(--bg-color);
-            background-image: 
-                linear-gradient(var(--grid-line) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
             background-size: 40px 40px;
             color: var(--text-grey);
             font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 60px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            margin: 0; padding: 40px 20px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
 
-        /* --- UPPER HEADER SECTION --- */
-        .hero-section {
-            width: 100%;
-            max-width: 900px;
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .badge {
-            display: inline-block;
-            border: 1px solid var(--text-green);
-            color: var(--text-green);
-            background: rgba(0, 255, 0, 0.05);
-            padding: 6px 14px;
-            font-size: 11px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            margin-bottom: 25px;
-        }
-
-        .hero-name {
-            font-family: 'Arial Black', Impact, sans-serif;
-            font-size: 5.5rem;
-            color: var(--text-green);
-            margin: 0;
-            line-height: 1;
-            letter-spacing: -2px;
-            text-transform: capitalize;
-        }
-
-        .hero-subtitle {
-            margin: 20px 0 40px;
-            font-size: 14px;
-        }
-
-        .highlight-blue {
-            color: #00aaff;
-            text-decoration: none;
-        }
-
-        .stats-grid {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-        }
-
-        .stat-card {
-            background-color: #0a0a0a;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            flex: 1;
-            padding: 20px 10px;
-            text-align: center;
-            transition: border-color 0.3s ease;
-        }
-
-        .stat-card:hover {
-            border-color: #444;
-        }
-
-        .stat-value {
-            color: var(--text-green);
-            font-family: 'Arial Black', sans-serif;
-            font-size: 1.4rem;
-            margin-bottom: 6px;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* --- TERMINAL SECTION --- */
-        .terminal-window {
-            width: 100%;
-            max-width: 900px;
-            background-color: var(--terminal-bg);
-            border-radius: 6px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            margin-bottom: 50px;
-        }
-
-        .top-bar {
-            background-color: #151515;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            font-size: 13px;
-            color: #888;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .buttons { display: flex; gap: 8px; margin-right: 15px; }
-        .btn { width: 12px; height: 12px; border-radius: 50%; }
-        .close { background-color: #ff5f56; }
-        .minimize { background-color: #ffbd2e; }
-        .maximize { background-color: #27c93f; }
-
-        .terminal-body {
-            padding: 20px;
-            height: 450px;
-            overflow-y: auto;
-            font-size: 14px;
-            line-height: 1.5;
-            color: var(--text-green);
-        }
-
-        .output-line { margin-bottom: 8px; white-space: pre-wrap; }
-        .input-line { display: flex; align-items: center; }
-        .prompt { color: var(--prompt-color); font-weight: bold; margin-right: 8px; }
-        .directory { color: var(--dir-color); }
+        .container { width: 100%; max-width: 850px; }
+        .header-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 40px; }
+        .logo { font-size: 26px; font-weight: bold; color: var(--text-green); margin: 0; letter-spacing: 1px;}
+        .nav-tabs { display: flex; gap: 12px; }
         
-        .cmd-input {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-family: inherit;
-            font-size: inherit;
-            outline: none;
-            flex-grow: 1;
+        .tab-btn {
+            background: transparent; border: 1px solid var(--border-color); color: var(--text-grey);
+            padding: 8px 16px; cursor: pointer; font-family: inherit; border-radius: 4px; transition: all 0.2s ease;
         }
-        .accent { color: var(--accent-color); }
+        .tab-btn.active, .tab-btn:hover { border-color: var(--text-green); color: var(--text-green); background: rgba(0, 255, 0, 0.02); }
+        .view-panel { display: none; }
+        .view-panel.active { display: block; }
 
-        /* --- CONTACT FOOTER SECTION --- */
-        .footer-section {
-            width: 100%;
-            max-width: 900px;
-            text-align: center;
-            padding-top: 20px;
-        }
+        /* Terminal Display Box */
+        .terminal-window { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+        .top-bar { background-color: #121212; padding: 10px; display: flex; gap: 6px; border-bottom: 1px solid var(--border-color); }
+        .circle { width: 10px; height: 10px; border-radius: 50%; background:#252525; }
+        .terminal-body { padding: 20px; height: 380px; overflow-y: auto; color: var(--text-green); font-size: 14px; line-height: 1.5; }
+        .input-line { display: flex; align-items: center; margin-top: 10px; }
+        .cmd-input { background: transparent; border: none; color: #fff; font-family: inherit; font-size: inherit; outline: none; flex-grow: 1; }
 
-        .footer-text {
-            color: #444;
-            font-size: 12px;
-            margin-top: 20px;
-        }
+        /* Public Log Feed */
+        .blog-post { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 25px; margin-bottom: 25px; }
+        .blog-meta { font-size: 11px; color: #555; margin-bottom: 10px; }
+        .blog-title { color: #fff; font-size: 22px; margin: 0 0 14px 0; font-family: sans-serif; }
+        .blog-content { line-height: 1.6; font-size: 14px; color: #ccc; white-space: pre-wrap; font-family: sans-serif; }
+        .blog-img { max-width: 100%; border-radius: 4px; margin-top: 15px; border: 1px solid var(--border-color); }
 
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .stats-grid { flex-wrap: wrap; }
-            .stat-card { min-width: 40%; }
-            .hero-name { font-size: 4rem; }
-        }
+        /* About Section Block */
+        .about-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 30px; line-height: 1.8; }
+        .about-card h3 { color: #fff; margin-top: 0; font-family: sans-serif; }
+
+        /* Form Controls */
+        input[type="text"], input[type="password"], textarea { width: 100%; padding: 12px; margin: 12px 0; background: #111; border: 1px solid #333; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: inherit;}
+        button.action-btn { background: var(--text-green); color: #000; border: none; padding: 12px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; width: 100%; text-transform: uppercase; font-family: inherit;}
+        .msg { padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 14px; background: rgba(255,0,0,0.1); border: 1px solid red; color: #ff5555; }
+        .mgmt-row { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 10px; margin-top: 10px; border-radius: 4px; border: 1px solid #222;}
     </style>
 </head>
 <body>
 
-    <!-- 1. UPPER SECTION -->
-    <div class="hero-section">
-        <div class="badge">▶BugFolio</div>
-        
-        <h1 class="hero-name">Anshu</h1>
-        
-        <div class="hero-subtitle">
-            Web Security  &nbsp;·&nbsp; <span class="highlight-blue">Linkedin + Fiverr + Upwork</span> &nbsp;·&nbsp; Bug Bounty + Freelancing
+<div class="container">
+
+    {% if view_mode == 'public' %}
+    <header class="header-nav">
+        <h1 class="logo">ANSHU//</h1>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('terminal-view')">[ Terminal ]</button>
+            <button class="tab-btn" onclick="switchTab('blog-view')">[ Daily Logs ]</button>
+            <button class="tab-btn" onclick="switchTab('about-view')">[ About Me ]</button>
         </div>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value">3</div>
-                <div class="stat-label">Platforms</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">BCA</div>
-                <div class="stat-label">Qualification</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">H1 · BC</div>
-                <div class="stat-label">Bug Bounty + Freelance</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">Open for Jobs</div>
-                <div class="stat-label">Hire Me</div>
+    </header>
+
+    <div id="terminal-view" class="view-panel active">
+        <div class="terminal-window">
+            <div class="top-bar"><div class="circle"></div><div class="circle"></div><div class="circle"></div></div>
+            <div class="terminal-body" id="terminalBody">
+                <div># System read-only interface. Type <span style="color:#ff5555">'help'</span> for lookup variables.</div>
+                <div id="history"></div>
+                <div class="input-line">
+                    <span style="color:#8833ff; font-weight:bold; margin-right:8px;">guest@bugfolio:~$</span>
+                    <input type="text" id="cmdInput" class="cmd-input" autofocus autocomplete="off" spellcheck="false">
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 2. TERMINAL SECTION -->
-    <div class="terminal-window">
-        <div class="top-bar">
-            <div class="buttons">
-                <div class="btn close"></div>
-                <div class="btn minimize"></div>
-                <div class="btn maximize"></div>
-            </div>
-            <div class="title">bugfolio@kali: ~/resume — zsh</div>
+    <div id="blog-view" class="view-panel">
+        {% if posts %}
+            {% for post in posts %}
+                <article class="blog-post">
+                    <div class="blog-meta">ID: {{ post.id }} // FILE: {{ post.image_name if post.image_name else 'NONE' }} // TIMESTAMP: {{ post.date_posted.strftime('%Y-%m-%d %H:%M UTC') }}</div>
+                    <h2 class="blog-title">{{ post.title }}</h2>
+                    <div class="blog-content">{{ post.content }}</div>
+                    
+                    {% if post.image_base64 %}
+                        <img src="data:image/jpeg;base64,{{ post.image_base64 }}" class="blog-img" alt="Log evidence upload snapshot">
+                    {% endif %}
+                </article>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px; border: 1px dashed #222; border-radius: 6px;">No structural logs published to timeline yet.</div>
+        {% endif %}
+    </div>
+
+    <div id="about-view" class="view-panel">
+        <div class="about-card">
+            <h3>RESEARCHER PATHWAY PROFILE</h3>
+            <p>Hello, I'm <span style="color:var(--text-green);">Anshu Vishwakarma</span>, a BCA graduate and application security researcher.</p>
+            <p>This layout operates under absolute read-only conditions for visitors. All data ingestion, terminal loops, and media tracking components are protected against injection parameters.</p>
         </div>
+    </div>
+    {% endif %}
+
+
+    {% if view_mode == 'admin_auth' %}
+    <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 40px; border-radius: 8px; max-width: 450px; margin: 60px auto; width:100%;">
+        <h2 style="color:var(--text-green); font-size:18px; margin-top:0;">VERIFY IDENTITY ACCESS</h2>
+        {% if error %}<div class="msg">{{ error }}</div>{% endif %}
+        <form method="POST" action="{{ url_for('admin_gateway') }}">
+            <input type="password" name="password" placeholder="Enter System Password Token" required autofocus>
+            <button type="submit" class="action-btn">Validate Privilege</button>
+        </form>
+    </div>
+    {% endif %}
+
+
+    {% if view_mode == 'admin_dashboard' %}
+    <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 35px; border-radius: 8px; width:100%;">
+        <h2 style="color:var(--text-green); font-size:20px; margin-top:0; border-bottom:1px solid #222; padding-bottom:10px;">SECURE LOG PUBLISHING ENGINE</h2>
+        {% if error %}<div class="msg">{{ error }}</div>{% endif %}
         
-        <div class="terminal-body" id="terminalBody">
-            <div class="output-line"># ──────────────────────────────────────────────────</div>
-            <div class="output-line"># PORTFOLIO :: Anshu Vishwakarma</div>
-            <div class="output-line"># Type <span class="accent">'help'</span> to interact with the Python engine.</div>
-            <div class="output-line"># ──────────────────────────────────────────────────</div>
+        <form method="POST" action="{{ url_for('admin_dashboard_view') }}" enctype="multipart/form-data">
+            <input type="text" name="title" placeholder="Log Tracking Heading" required>
+            <textarea name="content" rows="6" placeholder="Document plain text knowledge details acquired..." required></textarea>
             
-            <div id="history"></div>
+            <label style="font-size:12px; color:#666; display:block; margin-top:10px;">Optional Reference Image (PNG, JPG, GIF):</label>
+            <input type="file" name="image" accept="image/*" style="margin:10px 0 20px 0; color:#aaa;">
+            
+            <button type="submit" class="action-btn">Commit to Database String Array</button>
+        </form>
 
-            <div class="input-line">
-                <span class="prompt">bugfolio@kali:<span class="directory">~/resume</span>$</span>
-                <input type="text" id="cmdInput" class="cmd-input" autofocus autocomplete="off" spellcheck="false">
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. CONTACT FOOTER SECTION -->
-    <div class="footer-section">
-        <a href="mailto:your_email@example.com" style="text-decoration: none;">
-            <div class="badge" style="cursor: pointer;">▶ bugve6@gmail.com</div>
-        </a>
+        <h3 style="margin-top:40px; color:#fff; font-size:16px;">PURGE ENTRIES</h3>
+        {% if posts %}
+            {% for post in posts %}
+                <div class="mgmt-row">
+                    <span style="font-size:13px; color:#aaa;">{{ post.title }} ({{ post.image_name if post.image_name else 'No Image' }})</span>
+                    <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" style="margin:0;">
+                        <button type="submit" style="background:#ff5555; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; font-family:inherit; font-size:11px;">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:#555; font-size:13px;">No active entries saved to drop.</p>
+        {% endif %}
         
-        <div class="footer-text">
-            Built by Anshu &nbsp;·&nbsp; BCA Graduate &nbsp;·&nbsp; HackerOne & Bugcrowd & Freelance
-        </div>
+        <p style="text-align:center; margin-top:30px; font-size:12px;"><a href="{{ url_for('admin_logout') }}" style="color:#ff5555; text-decoration:none;">Discard Session Authorization</a></p>
     </div>
+    {% endif %}
 
-    <!-- TERMINAL SCRIPT (Unchanged logic, just keeping it working) -->
-    <script>
-        const cmdInput = document.getElementById('cmdInput');
-        const history = document.getElementById('history');
-        const terminalBody = document.getElementById('terminalBody');
+</div>
 
+<script>
+    function switchTab(viewId) {
+        document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if(viewId === 'terminal-view') document.getElementById('cmdInput').focus();
+    }
+
+    const cmdInput = document.getElementById('cmdInput');
+    const history = document.getElementById('history');
+    const terminalBody = document.getElementById('terminalBody');
+
+    if (cmdInput) {
         cmdInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 const input = cmdInput.value.trim();
                 if (input === '') return;
 
-
-                const cmdEcho = document.createElement('div');
-                cmdEcho.className = 'output-line';
-                cmdEcho.innerHTML = `<span class="prompt">bugfolio@kali:<span class="directory">~/resume</span>$</span> ${escapeHTML(input)}`;
-                history.appendChild(cmdEcho);
+                const echo = document.createElement('div');
+                echo.innerHTML = `<span style="color:#8833ff; font-weight:bold;">guest@bugfolio:~$</span> ${escapeHTML(input)}`;
+                history.appendChild(echo);
                 cmdInput.value = '';
 
                 if (input.toLowerCase() === 'clear') {
@@ -283,25 +203,19 @@
                 .then(res => res.json())
                 .then(data => {
                     const response = document.createElement('div');
-                    response.className = 'output-line';
+                    response.style.margin = "4px 0 12px 0";
                     response.innerHTML = data.output;
                     history.appendChild(response);
                     terminalBody.scrollTop = terminalBody.scrollHeight;
-                })
-                .catch(() => {
-                    const err = document.createElement('div');
-                    err.className = 'output-line accent';
-                    err.innerHTML = 'Error: Remote connection to Python backend failed.';
-                    history.appendChild(err);
                 });
             }
         });
+    }
 
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
-        }
-
-        terminalBody.addEventListener('click', () => cmdInput.focus());
-    </script>
+    function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+    }
+    if (terminalBody) terminalBody.addEventListener('click', () => cmdInput.focus());
+</script>
 </body>
 </html>

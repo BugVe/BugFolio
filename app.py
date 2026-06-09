@@ -1,88 +1,131 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
+from datetime import datetime
+import base64
 import os
+import tempfile
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'super-secure-dev-fallback-key-123987')
 
-# Fallback configuration for production or local development environments
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///portfolio.db')
+# Limit upload payloads to 2MB maximum to stop Denial of Service (DoS) attempts
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+
+db_path = os.path.join(tempfile.gettempdir(), 'portfolio.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Database Model Schema
-class Project(db.Model):
+class BlogPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
-    tech_stack = db.Column(db.String(100))
-    description = db.Column(db.Text)
-    is_public = db.Column(db.Boolean, default=True) # Direct Access/IDOR control protection
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    image_name = db.Column(db.String(100), nullable=True)  # Simple clean name track
+    image_base64 = db.Column(db.Text, nullable=True)       # Image converted to safe string text
+    date_posted = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Explicit Hardcoded Content Registry (Strictly kills file system access vectors)
-SAFE_FILES = {
-    "contact.txt": "Email     : bugve6@gmail.com\nLocation  : Mirzapur, UP, IN\nGitHub    : github.com/BugVe\nHackerOne : hackerone.com/bugve <span style='color:#ff5555'>[ACTIVE]</span>",
-    "summary.txt": "Results-driven Cyber Security Enthusiast and active Bug Bounty Hunter specializing in Web Application Penetration Testing. Proven track record of identifying critical security flaws—including subdomain takeovers and WAF bypasses—within enterprise-scale infrastructure. Combines strong development foundations in Python and SQL with a comprehensive understanding of offensive security testing methodologies and the OWASP Top 10. Adept at conducting thorough threat modeling, analyzing web traffic, and writing actionable vulnerability disclosure reports. Eager to bring a rigorous, security-first testing approach to a dedicated security analyst or penetration testing team.",
-    "bug_bounty/findings.log": "<span style='color:#ff5555'>[HIGH]</span> Dell — Subdomain Takeover\n└─ Identified vulnerability exposing infrastructure to hijacking.\n<span style='color:#ff5555'>[MEDIUM]</span> Starbucks — WAF Bypass\n└─ Bypassed active Web Application Firewall protections."
-}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+def is_allowed_image(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# ─── PUBLIC PORTFOLIO ENGINE ───
 @app.route('/')
 def index():
-    return render_template('index.html')
+    posts = BlogPost.query.order_by(BlogPost.date_posted.desc()).all()
+    return render_template('index.html', posts=posts, view_mode='public')
 
+# Strict Whitelisted Terminal Loop (No other inputs process)
 @app.route('/api/terminal', methods=['POST'])
 def handle_terminal_api():
     data = request.get_json() or {}
-    raw_input = data.get('command', '').strip()
+    raw_input = data.get('command', '').strip().lower()
     
-    if not raw_input:
-        return jsonify({"output": ""})
+    ALLOWED_COMMANDS = ['help', 'skills', 'resume', 'clear']
+    if not raw_input or raw_input not in ALLOWED_COMMANDS:
+        return jsonify({"output": "bash: command executed is unrecognized or access parameters are restricted."})
 
-    parts = raw_input.split(maxsplit=1)
-    base_cmd = parts[0].lower()
-    argument = parts[1] if len(parts) > 1 else ""
+    if raw_input == "help":
+        return jsonify({"output": "Available options:<br>  <b>skills</b> - Display my technical security stack<br>  <b>resume</b> - Output career profile background<br>  <b>clear</b>  - Flush terminal screen memory"})
+    elif raw_input == "skills":
+        return jsonify({"output": "<span style='color:#00ffff'>Languages:</span> Python, SQL, Bash<br><span style='color:#00ffff'>Focus:</span> Web Security Architecture, Safe Input Parsing Controls."})
+    elif raw_input == "resume":
+        return jsonify({"output": "<b>Anshu Vishwakarma</b><br>Security Researcher & BCA Graduate.<br>Specialized in building input-validated defense frameworks."})
+    return jsonify({"output": ""})
 
-    # ---- CAT COMMAND LAYER (Protected against IDOR & Arbitrary Path Traversal) ----
-    if base_cmd == "cat":
-        if argument in SAFE_FILES:
-            return jsonify({"output": SAFE_FILES[argument].replace('\n', '<br>')})
-        return jsonify({"output": f"cat: {argument}: Permission denied or file structure access missing."})
 
-    # ---- VIEW_PROJECT LAYER (Protected against SQL Injection via ORM Parameters & IDOR via column validation) ----
-    elif base_cmd == "view_project":
-        if not argument:
-            return jsonify({"output": "Usage: view_project [project_name]<br>Example: view_project AuthBid"})
+# ─── SECURE ADMIN PATHS (COMBINED INTO ONE HTML TEMPLATE) ───
+@app.route('/admin-gateway', methods=['GET', 'POST'])
+def admin_gateway():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        stored_hash = os.environ.get('ADMIN_PASSWORD_HASH')
         
-        # Secured completely from SQLi natively by parameterization layers in SQLAlchemy
-        # Enforces object access check (is_public=True) to prevent guessing of hidden project scopes
-        project = Project.query.filter_by(name=argument, is_public=True).first()
+        if stored_hash and check_password_hash(stored_hash, password):
+            session['admin_logged_in'] = True
+            return redirect(url_for('admin_dashboard_view'))
+        return render_template('index.html', view_mode='admin_auth', error="Access Refused: Token mismatch.")
         
-        if project:
-            return jsonify({
-                "output": f"Project: {project.name} [{project.tech_stack}]<br>└─ {project.description}"
-            })
-        return jsonify({"output": f"Error: Project '{argument}' restricted or non-existent."})
+    if session.get('admin_logged_in'):
+        return redirect(url_for('admin_dashboard_view'))
+    return render_template('index.html', view_mode='admin_auth')
 
-    # ---- LS COMMAND LAYER ----
-    elif base_cmd == "ls":
-        if argument == "skills/":
-            return jsonify({"output": "<span style='color:#00ffff'>languages/</span><br>  Python, SQL, Java, C++<br><span style='color:#00ffff'>tools/</span><br>  Burp Suite, Wireshark, Subfinder, Kali Linux"})
-        elif argument == "projects/":
-            return jsonify({"output": "<span style='color:#00ffff'>AuthBid/</span> [Python, SQL]<br><span style='color:#00ffff'>SportsConnect/</span> [Python, SQL]<br><br>Type 'view_project [name]' to see execution details."})
-        else:
-            return jsonify({"output": "skills/&nbsp;&nbsp;&nbsp;&nbsp;projects/&nbsp;&nbsp;&nbsp;&nbsp;contact.txt&nbsp;&nbsp;&nbsp;&nbsp;summary.txt&nbsp;&nbsp;&nbsp;&nbsp;bug_bounty/"})
 
-    # ---- HELP COMMAND LAYER ----
-    elif base_cmd == "help":
-        return jsonify({"output": "Available commands:<br>  ls<br>  ls skills/<br>  ls projects/<br>  cat contact.txt<br>  cat summary.txt<br>  cat bug_bounty/findings.log<br>  view_project [name]<br>  clear"})
+@app.route('/admin-gateway/dashboard', methods=['GET', 'POST'])
+def admin_dashboard_view():
+    # Anti-IDOR Check: Server session must be validated before access is granted
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_gateway'))
+        
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        content = request.form.get('content', '').strip()
+        file = request.files.get('image')
+        
+        b64_string = None
+        clean_name = None
 
-    return jsonify({"output": f"bash: command not found: {base_cmd}"})
+        if file and file.filename != '':
+            if is_allowed_image(file.filename):
+                # Simple name processing with clean characters, no path paths allowed
+                clean_name = secure_filename(file.filename)
+                
+                # Convert the image bytes directly into a plain text base64 string
+                # This completely strips out the server execution context
+                file_bytes = file.read()
+                b64_string = base64.b64encode(file_bytes).decode('utf-8')
+            else:
+                posts = BlogPost.query.order_by(BlogPost.date_posted.desc()).all()
+                return render_template('index.html', view_mode='admin_dashboard', posts=posts, error="Extension rejected.")
 
-# Production initialization script
+        if title and content:
+            new_post = BlogPost(title=title, content=content, image_name=clean_name, image_base64=b64_string)
+            db.session.add(new_post)
+            db.session.commit()
+            return redirect(url_for('admin_dashboard_view'))
+            
+    posts = BlogPost.query.order_by(BlogPost.date_posted.desc()).all()
+    return render_template('index.html', view_mode='admin_dashboard', posts=posts)
+
+
+@app.route('/admin-gateway/delete/<int:post_id>', methods=['POST'])
+def delete_post(post_id):
+    # Strict server verification to block broken object level modifications
+    if not session.get('admin_logged_in'):
+        return jsonify({"error": "Action refused: State context invalid."}), 403
+        
+    target_post = BlogPost.query.get_or_404(post_id)
+    db.session.delete(target_post)
+    db.session.commit()
+    return redirect(url_for('admin_dashboard_view'))
+
+
+@app.route('/admin-gateway/logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    return redirect(url_for('index'))
+
 with app.app_context():
     db.create_all()
-    if not Project.query.first():
-        db.session.add(Project(name="AuthBid", tech_stack="Python, SQL", description="Token-based secure marketplace engine built to neutralize top OWASP web threats.", is_public=True))
-        db.session.add(Project(name="SportsConnect", tech_stack="Python, SQL", description="Location-aware local player discovery platform utilizing parameterized input validation queries.", is_public=True))
-        db.session.commit()
-
-if __name__ == '__main__':
-    app.run(debug=True)
