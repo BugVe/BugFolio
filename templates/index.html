@@ -111,11 +111,258 @@
 
     <div id="about-view" class="view-panel">
         <div class="about-card">
+            <h3>RESEARCHER PROFILE</h3>
+            <p>Hello, I'm <span style="color:var(--text-green);">Anshu Vishwakarma</span>, a BCA graduate and application security researcher.</p>
+            <p>This layout operates under absolute read-only conditions for visitors. All data ingestion, terminal loops, and media tracking components are protected against injection parameters.</p>
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% if view_mode == 'admin_auth' %}
+    <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 40px; border-radius: 8px; max-width: 450px; margin: 60px auto; width:100%;">
+        <h2 style="color:var(--text-green); font-size:18px; margin-top:0;">VERIFY IDENTITY</h2>
+        {% if error %}<div class="msg">{{ error }}</div>{% endif %}
+        <form method="POST" action="{{ url_for('admin_gateway') }}">
+            <input type="password" name="password" placeholder="Enter System Password Token" required autofocus>
+            <button type="submit" class="action-btn">Validate</button>
+        </form>
+    </div>
+    {% endif %}
+
+
+    {% if view_mode == 'admin_dashboard' %}
+    <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 35px; border-radius: 8px; width:100%;">
+        <h2 style="color:var(--text-green); font-size:20px; margin-top:0; border-bottom:1px solid #222; padding-bottom:10px;">BLOG PUBLISHING ENGINE</h2>
+        {% if error %}<div class="msg">{{ error }}</div>{% endif %}
+        
+        <form method="POST" action="{{ url_for('admin_dashboard_view') }}" enctype="multipart/form-data">
+            <input type="text" name="title" placeholder="Log Tracking Heading" required>
+            <textarea name="content" rows="6" placeholder="Document plain text knowledge details acquired..." required></textarea>
+            
+            <label style="font-size:12px; color:#666; display:block; margin-top:10px;">Optional Reference Image (PNG, JPG, GIF):</label>
+            <input type="file" name="image" accept="image/*" style="margin:10px 0 20px 0; color:#aaa;">
+            
+            <button type="submit" class="action-btn">Commit</button>
+        </form>
+
+        <h3 style="margin-top:40px; color:#fff; font-size:16px;">ENTRIES</h3>
+        {% if posts %}
+            {% for post in posts %}
+                <div class="mgmt-row">
+                    <span style="font-size:13px; color:#aaa;">{{ post.title }} ({{ post.image_name if post.image_name else 'No Image' }})</span>
+                    <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" style="margin:0;">
+                        <button type="submit" style="background:#ff5555; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; font-family:inherit; font-size:11px;">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:#555; font-size:13px;">No active entries saved to drop.</p>
+        {% endif %}
+        
+        <p style="text-align:center; margin-top:30px; font-size:12px;"><a href="{{ url_for('admin_logout') }}" style="color:#ff5555; text-decoration:none;">Discard Session Authorization</a></p>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+    function switchTab(viewId) {
+        document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if(viewId === 'terminal-view') document.getElementById('cmdInput').focus();
+    }
+
+    const cmdInput = document.getElementById('cmdInput');
+    const history = document.getElementById('history');
+    const terminalBody = document.getElementById('terminalBody');
+
+    if (cmdInput) {
+        cmdInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const input = cmdInput.value.trim();
+                if (input === '') return;
+
+                const echo = document.createElement('div');
+                echo.innerHTML = `<span style="color:#8833ff; font-weight:bold;">guest@bugfolio:~$</span> ${escapeHTML(input)}`;
+                history.appendChild(echo);
+                cmdInput.value = '';
+
+                if (input.toLowerCase() === 'clear') {
+                    history.innerHTML = '';
+                    return;
+                }
+
+                fetch('/api/terminal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: input })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const response = document.createElement('div');
+                    response.style.margin = "4px 0 12px 0";
+                    response.innerHTML = data.output;
+                    history.appendChild(response);
+                    terminalBody.scrollTop = terminalBody.scrollHeight;
+                });
+            }
+        });
+    }
+
+    function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+    }
+    if (terminalBody) terminalBody.addEventListener('click', () => cmdInput.focus());
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anshu | Security Portfolio</title>
+    <style>
+        :root {
+            --bg-color: #060606;
+            --card-bg: #0d0d0d;
+            --text-green: #00ff00; 
+            --text-grey: #a0a0a0;
+            --border-color: #222;
+            --grid-line: rgba(255, 255, 255, 0.02);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--text-grey);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0; padding: 40px 20px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; min-height: 85vh; }
+        .header-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 40px; }
+        .logo { font-size: 26px; font-weight: bold; color: var(--text-green); margin: 0; letter-spacing: 1px;}
+        .nav-tabs { display: flex; gap: 12px; }
+        
+        .tab-btn {
+            background: transparent; border: 1px solid var(--border-color); color: var(--text-grey);
+            padding: 8px 16px; cursor: pointer; font-family: inherit; border-radius: 4px; transition: all 0.2s ease;
+        }
+        .tab-btn.active, .tab-btn:hover { border-color: var(--text-green); color: var(--text-green); background: rgba(0, 255, 0, 0.02); }
+        .view-panel { display: none; flex-grow: 1; }
+        .view-panel.active { display: block; }
+
+        /* Terminal Display Box */
+        .terminal-window { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+        .top-bar { background-color: #121212; padding: 10px; display: flex; gap: 6px; border-bottom: 1px solid var(--border-color); }
+        .circle { width: 10px; height: 10px; border-radius: 50%; background:#252525; }
+        .terminal-body { padding: 20px; height: 380px; overflow-y: auto; color: var(--text-green); font-size: 14px; line-height: 1.5; }
+        .input-line { display: flex; align-items: center; margin-top: 10px; }
+        .cmd-input { background: transparent; border: none; color: #fff; font-family: inherit; font-size: inherit; outline: none; flex-grow: 1; }
+
+        /* Public Log Feed */
+        .blog-post { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 25px; margin-bottom: 25px; }
+        .blog-meta { font-size: 11px; color: #555; margin-bottom: 10px; }
+        .blog-title { color: #fff; font-size: 22px; margin: 0 0 14px 0; font-family: sans-serif; }
+        .blog-content { line-height: 1.6; font-size: 14px; color: #ccc; white-space: pre-wrap; font-family: sans-serif; }
+        .blog-img { max-width: 100%; border-radius: 4px; margin-top: 15px; border: 1px solid var(--border-color); }
+
+        /* About Section Block */
+        .about-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 30px; line-height: 1.8; }
+        .about-card h3 { color: #fff; margin-top: 0; font-family: sans-serif; }
+
+        /* Form Controls */
+        input[type="text"], input[type="password"], textarea { width: 100%; padding: 12px; margin: 12px 0; background: #111; border: 1px solid #333; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: inherit;}
+        button.action-btn { background: var(--text-green); color: #000; border: none; padding: 12px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; width: 100%; text-transform: uppercase; font-family: inherit;}
+        .msg { padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 14px; background: rgba(255,0,0,0.1); border: 1px solid red; color: #ff5555; }
+        .mgmt-row { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 10px; margin-top: 10px; border-radius: 4px; border: 1px solid #222;}
+
+        /* --- HARDENED MINIMALIST FOOTER --- */
+        .secure-footer {
+            margin-top: auto;
+            padding-top: 40px;
+            padding-bottom: 20px;
+            border-top: 1px dashed #222;
+            text-align: center;
+            font-size: 12px;
+            color: #555;
+            letter-spacing: 0.5px;
+        }
+        .footer-link {
+            color: var(--text-green);
+            text-decoration: none;
+            margin: 0 12px;
+            transition: opacity 0.2s ease;
+        }
+        .footer-link:hover { opacity: 0.8; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    {% if view_mode == 'public' %}
+    <header class="header-nav">
+        <h1 class="logo">ANSHU//</h1>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('terminal-view')">[ Terminal ]</button>
+            <button class="tab-btn" onclick="switchTab('blog-view')">[ Daily Logs ]</button>
+            <button class="tab-btn" onclick="switchTab('about-view')">[ About Me ]</button>
+        </div>
+    </header>
+
+    <div id="terminal-view" class="view-panel active">
+        <div class="terminal-window">
+            <div class="top-bar"><div class="circle"></div><div class="circle"></div><div class="circle"></div></div>
+            <div class="terminal-body" id="terminalBody">
+                <div># System read-only interface. Type <span style="color:#ff5555">'help'</span> for lookup variables.</div>
+                <div id="history"></div>
+                <div class="input-line">
+                    <span style="color:#8833ff; font-weight:bold; margin-right:8px;">guest@bugfolio:~$</span>
+                    <input type="text" id="cmdInput" class="cmd-input" autofocus autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="blog-view" class="view-panel">
+        {% if posts %}
+            {% for post in posts %}
+                <article class="blog-post">
+                    <div class="blog-meta">ID: {{ post.id }} // FILE: {{ post.image_name if post.image_name else 'NONE' }} // TIMESTAMP: {{ post.date_posted.strftime('%Y-%m-%d %H:%M UTC') }}</div>
+                    <h2 class="blog-title">{{ post.title }}</h2>
+                    <div class="blog-content">{{ post.content }}</div>
+                    
+                    {% if post.image_base64 %}
+                        <img src="data:image/jpeg;base64,{{ post.image_base64 }}" class="blog-img" alt="Log evidence upload snapshot">
+                    {% endif %}
+                </article>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px; border: 1px dashed #222; border-radius: 6px;">No structural logs published to timeline yet.</div>
+        {% endif %}
+    </div>
+
+    <div id="about-view" class="view-panel">
+        <div class="about-card">
             <h3>RESEARCHER PATHWAY PROFILE</h3>
             <p>Hello, I'm <span style="color:var(--text-green);">Anshu Vishwakarma</span>, a BCA graduate and application security researcher.</p>
             <p>This layout operates under absolute read-only conditions for visitors. All data ingestion, terminal loops, and media tracking components are protected against injection parameters.</p>
         </div>
     </div>
+
+    <footer class="secure-footer">
+        <span>// SECURE COMS NODE // </span>
+        <a href="mailto:your.email@gmail.com" class="footer-link">[ Gmail ]</a>
+        <a href="https://github.com/bugve" target="_blank" class="footer-link">[ GitHub ]</a>
+        <a href="https://hackerone.com/your-username" target="_blank" class="footer-link">[ HackerOne ]</a>
+    </footer>
     {% endif %}
 
 
@@ -208,6 +455,250 @@
                     history.appendChild(response);
                     terminalBody.scrollTop = terminalBody.scrollHeight;
                 });
+            }
+        });
+    }
+
+    function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+    }
+    if (terminalBody) terminalBody.addEventListener('click', () => cmdInput.focus());
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anshu | Security Portfolio</title>
+    <style>
+        :root {
+            --bg-color: #060606;
+            --card-bg: #0d0d0d;
+            --text-green: #00ff00; 
+            --text-grey: #a0a0a0;
+            --border-color: #222;
+            --grid-line: rgba(255, 255, 255, 0.02);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--text-grey);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0; padding: 40px 20px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; min-height: 85vh; }
+        .header-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 40px; }
+        .logo { font-size: 26px; font-weight: bold; color: var(--text-green); margin: 0; letter-spacing: 1px;}
+        .nav-tabs { display: flex; gap: 12px; }
+        
+        .tab-btn {
+            background: transparent; border: 1px solid var(--border-color); color: var(--text-grey);
+            padding: 8px 16px; cursor: pointer; font-family: inherit; border-radius: 4px; transition: all 0.2s ease;
+        }
+        .tab-btn.active, .tab-btn:hover { border-color: var(--text-green); color: var(--text-green); background: rgba(0, 255, 0, 0.02); }
+        .view-panel { display: none; flex-grow: 1; }
+        .view-panel.active { display: block; }
+
+        /* Terminal styling controls */
+        .terminal-window { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+        .top-bar { background-color: #121212; padding: 10px; display: flex; gap: 6px; border-bottom: 1px solid var(--border-color); }
+        .circle { width: 10px; height: 10px; border-radius: 50%; background:#252525; }
+        .terminal-body { padding: 20px; height: 380px; overflow-y: auto; color: var(--text-green); font-size: 14px; line-height: 1.5; }
+        .input-line { display: flex; align-items: center; margin-top: 10px; }
+        .cmd-input { background: transparent; border: none; color: #fff; font-family: inherit; font-size: inherit; outline: none; flex-grow: 1; }
+
+        /* Content Post layout feeds */
+        .blog-post { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 25px; margin-bottom: 25px; position: relative;}
+        .blog-meta { font-size: 11px; color: #555; margin-bottom: 10px; }
+        .blog-title { color: #fff; font-size: 22px; margin: 0 0 14px 0; font-family: sans-serif; }
+        .blog-content { line-height: 1.6; font-size: 14px; color: #ccc; white-space: pre-wrap; font-family: sans-serif; }
+        .blog-img { max-width: 100%; border-radius: 4px; margin-top: 15px; border: 1px solid var(--border-color); }
+
+        /* Administrative publishing control layout */
+        .admin-box { background: #0a0a0a; border: 1px solid red; padding: 25px; border-radius: 6px; margin-bottom: 30px; }
+        input[type="text"], textarea { width: 100%; padding: 12px; margin: 12px 0; background: #111; border: 1px solid #333; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: inherit;}
+        button.action-btn { background: var(--text-green); color: #000; border: none; padding: 12px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase; font-family: inherit;}
+        .del-btn { position: absolute; top: 25px; right: 25px; background: #ff5555; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 12px;}
+
+        .secure-footer { margin-top: auto; padding-top: 40px; padding-bottom: 20px; border-top: 1px dashed #222; text-align: center; font-size: 12px; color: #555; }
+        .footer-link { color: var(--text-green); text-decoration: none; margin: 0 12px; }
+        .footer-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header class="header-nav">
+        <h1 class="logo">ANSHU//</h1>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('terminal-view')">[ Terminal ]</button>
+            <button class="tab-btn" onclick="switchTab('blog-view')">[ Daily Logs ]</button>
+            <button class="tab-btn" onclick="switchTab('about-me')">[ About Me ]</button>
+            {% if is_admin %}
+                <a href="{{ url_for('admin_logout') }}" style="border-color:#ff5555; color:#ff5555;" class="tab-btn">[ Drop Token ]</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div id="terminal-view" class="view-panel active">
+        <div class="terminal-window">
+            <div class="top-bar"><div class="circle"></div><div class="circle"></div><div class="circle"></div></div>
+            <div class="terminal-body" id="terminalBody">
+                <div># Core sandbox platform operational environment. Type <span style="color:#ff5555">'help'</span> for lookup parameters.</div>
+                <div id="history"></div>
+                <div class="input-line">
+                    <span id="prompt-label" style="color:#8833ff; font-weight:bold; margin-right:8px;">guest@bugfolio:~$</span>
+                    <input type="text" id="cmdInput" class="cmd-input" autofocus autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="blog-view" class="view-panel">
+        
+        {% if is_admin %}
+        <div class="admin-box">
+            <h3 style="color:red; margin-top:0; font-size:14px; letter-spacing:0.5px;">⚠️ SECURE HOST SESSION PRIVILEGE TERMINATION MATRIX OPENED</h3>
+            <form method="POST" action="{{ url_for('publish_entry') }}" enctype="multipart/form-data">
+                <input type="text" name="title" placeholder="Document Heading Subject Line" required>
+                <textarea name="content" rows="5" placeholder="Input structural details (everything written parses strictly as clean safe plain text tags)..." required></textarea>
+                <label style="font-size:11px; color:#555; display:block;">Optional Attachment Reference Block (PNG, JPG, GIF):</label>
+                <input type="file" name="image" accept="image/*" style="margin:8px 0 15px 0; color:#555;">
+                <button type="submit" class="action-btn">Commit Assets into Database Array Stream</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if posts %}
+            {% for post in posts %}
+                <article class="blog-post">
+                    <div class="blog-meta">ASSET_REF: #{{ post.id }} // FILE_MARKER: {{ post.image_name if post.image_name else 'NULL' }} // STAMP: {{ post.date_posted.strftime('%Y-%m-%d %H:%M') }}</div>
+                    
+                    <h2 class="blog-title">{{ post.title }}</h2>
+                    <div class="blog-content">{{ post.content }}</div>
+                    
+                    {% if post.image_base64 %}
+                        <img src="data:image/jpeg;base64,{{ post.image_base64 }}" class="blog-img" alt="Evidence snapshot alignment track">
+                    {% endif %}
+
+                    {% if is_admin %}
+                        <form method="POST" action="{{ url_for('delete_entry', post_id=post.id) }}">
+                            <button type="submit" class="del-btn">Purge Item</button>
+                        </form>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px; border: 1px dashed #222; border-radius: 6px;">No structural data elements deployed into tracking database models.</div>
+        {% endif %}
+    </div>
+
+    <div id="about-me" class="view-panel">
+        <div class="about-card">
+            <h3>RESEARCHER ACCESS PROFILES</h3>
+            <p>Hello, I'm <span style="color:var(--text-green);">Anshu Vishwakarma</span>, a BCA Graduate and Application Security Researcher.</p>
+            <p>This sandbox architecture runs under completely read-only specifications for remote visitors. Data submission engines remain locked down behind non-exposed server processing barriers.</p>
+        </div>
+    </div>
+
+    <footer class="secure-footer">
+        <span>// CONTACT LINKS TERMINAL MATRIX // </span>
+        <a href="mailto:your.email@gmail.com" class="footer-link">[ Gmail ]</a>
+        <a href="https://github.com/bugve" target="_blank" class="footer-link">[ GitHub ]</a>
+    </footer>
+
+</div>
+
+<script>
+    function switchTab(viewId) {
+        document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if(viewId === 'terminal-view') document.getElementById('cmdInput').focus();
+    }
+
+    const cmdInput = document.getElementById('cmdInput');
+    const history = document.getElementById('history');
+    const terminalBody = document.getElementById('terminalBody');
+    const promptLabel = document.getElementById('prompt-label');
+
+    let awaitingPassword = false;
+
+    if (cmdInput) {
+        cmdInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const input = cmdInput.value;
+                if (input.trim() === '' && !awaitingPassword) return;
+
+                if (!awaitingPassword) {
+                    // Phase A: Display normal command echo patterns
+                    const echo = document.createElement('div');
+                    echo.innerHTML = `<span style="color:#8833ff; font-weight:bold;">guest@bugfolio:~$</span> ${escapeHTML(input)}`;
+                    history.appendChild(echo);
+                    cmdInput.value = '';
+
+                    if (input.trim().toLowerCase() === 'clear') {
+                        history.innerHTML = '';
+                        return;
+                    }
+
+                    fetch('/api/terminal', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ command: input })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        const response = document.createElement('div');
+                        response.style.margin = "4px 0 12px 0";
+                        response.innerHTML = data.output;
+                        history.appendChild(response);
+                        
+                        // Shift shell layout state to complete blind input style
+                        if (data.await_password) {
+                            awaitingPassword = true;
+                            cmdInput.style.color = 'transparent';
+                            cmdInput.style.caretColor = 'transparent';
+                            promptLabel.style.display = 'none';
+                        }
+                        terminalBody.scrollTop = terminalBody.scrollHeight;
+                    });
+                } else {
+                    // Phase B: Blindly dispatch input packet directly into token authentication sequence
+                    cmdInput.value = '';
+                    
+                    // Recover standard input styling
+                    cmdInput.style.color = '#fff';
+                    cmdInput.style.caretColor = 'auto';
+                    promptLabel.style.display = 'inline';
+                    awaitingPassword = false;
+
+                    fetch('/api/terminal', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: input })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        const response = document.createElement('div');
+                        response.style.margin = "4px 0 12px 0";
+                        response.innerHTML = data.output;
+                        history.appendChild(response);
+                        terminalBody.scrollTop = terminalBody.scrollHeight;
+
+                        if (data.authenticated) {
+                            setTimeout(() => { window.location.reload(); }, 1200);
+                        }
+                    });
+                }
             }
         });
     }
