@@ -977,3 +977,217 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anshu | Security Portfolio</title>
+    <style>
+        :root {
+            --bg-color: #060606;
+            --card-bg: #0d0d0d;
+            --text-green: #00ff00; 
+            --text-grey: #a0a0a0;
+            --border-color: #222;
+            --grid-line: rgba(255, 255, 255, 0.02);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--text-grey);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0; padding: 40px 20px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; min-height: 85vh; }
+        .header-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 40px; }
+        .logo { font-size: 26px; font-weight: bold; color: var(--text-green); margin: 0; letter-spacing: 1px;}
+        .nav-tabs { display: flex; gap: 12px; }
+        
+        .tab-btn {
+            background: transparent; border: 1px solid var(--border-color); color: var(--text-grey);
+            padding: 8px 16px; cursor: pointer; font-family: inherit; border-radius: 4px; transition: all 0.2s ease;
+        }
+        .tab-btn.active, .tab-btn:hover { border-color: var(--text-green); color: var(--text-green); background: rgba(0, 255, 0, 0.02); }
+        .view-panel { display: none; flex-grow: 1; }
+        .view-panel.active { display: block; }
+
+        /* Terminal styling */
+        .terminal-window { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+        .top-bar { background-color: #121212; padding: 10px; display: flex; gap: 6px; border-bottom: 1px solid var(--border-color); }
+        .circle { width: 10px; height: 10px; border-radius: 50%; background:#252525; }
+        .terminal-body { padding: 20px; height: 380px; overflow-y: auto; color: var(--text-green); font-size: 14px; line-height: 1.5; }
+        .input-line { display: flex; align-items: center; margin-top: 10px; }
+        .cmd-input { background: transparent; border: none; color: #fff; font-family: inherit; font-size: inherit; outline: none; flex-grow: 1; }
+
+        /* Safe Post Stream Cards */
+        .blog-post { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 25px; margin-bottom: 25px; position: relative;}
+        .blog-meta { font-size: 11px; color: #555; margin-bottom: 10px; }
+        .blog-title { color: #fff; font-size: 22px; margin: 0 0 14px 0; font-family: sans-serif; }
+        .blog-content { line-height: 1.6; font-size: 14px; color: #ccc; white-space: pre-wrap; font-family: sans-serif; }
+        .blog-img { max-width: 100%; border-radius: 4px; margin-top: 15px; border: 1px solid var(--border-color); }
+
+        /* Admin Publishing Drawer */
+        .admin-box { background: #0a0a0a; border: 1px solid red; padding: 25px; border-radius: 6px; margin-bottom: 30px; }
+        input[type="text"], textarea { width: 100%; padding: 12px; margin: 12px 0; background: #111; border: 1px solid #333; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: inherit;}
+        button.action-btn { background: var(--text-green); color: #000; border: none; padding: 12px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase; font-family: inherit;}
+        .del-btn { position: absolute; top: 25px; right: 25px; background: #ff5555; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 12px;}
+
+        .secure-footer { margin-top: auto; padding-top: 40px; padding-bottom: 20px; border-top: 1px dashed #222; text-align: center; font-size: 12px; color: #555; }
+        .footer-link { color: var(--text-green); text-decoration: none; margin: 0 12px; }
+        .footer-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header class="header-nav">
+        <h1 class="logo">ANSHU//</h1>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('terminal-view')">[ Terminal ]</button>
+            <button class="tab-btn" onclick="switchTab('blog-view')">[ Daily Logs ]</button>
+            <button class="tab-btn" onclick="switchTab('about-view')">[ About Me ]</button>
+            {% if is_admin %}
+                <a href="{{ url_for('admin_logout') }}" style="border-color:#ff5555; color:#ff5555;" class="tab-btn">[ Drop Token ]</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div id="terminal-view" class="view-panel active">
+        <div class="terminal-window">
+            <div class="top-bar"><div class="circle"></div><div class="circle"></div><div class="circle"></div></div>
+            <div class="terminal-body" id="terminalBody">
+                <div># System operational environment. Type <span style="color:#ff5555">'help'</span> for instructions.</div>
+                <div id="history"></div>
+                <div class="input-line">
+                    <span style="color:#8833ff; font-weight:bold; margin-right:8px;">guest@bugfolio:~$</span>
+                    <input type="text" id="cmdInput" class="cmd-input" autofocus autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="blog-view" class="view-panel">
+        
+        {% if is_admin %}
+        <div class="admin-box">
+            <h3 style="color:red; margin-top:0; font-size:14px; letter-spacing:1px;">⚠️ ELEVATED ADMINISTRATIVE SESSION ACTIVE</h3>
+            <form method="POST" action="{{ url_for('publish_entry') }}" enctype="multipart/form-data">
+                <input type="text" name="title" placeholder="Log Entry Title Heading" required>
+                <textarea name="content" rows="5" placeholder="Document data details (interpreted strictly as safe plaintext)..." required></textarea>
+                <label style="font-size:11px; color:#666; display:block;">Attachment Node (PNG, JPG, GIF):</label>
+                <input type="file" name="image" accept="image/*" style="margin:8px 0 15px 0; color:#666;">
+                <button type="submit" class="action-btn">Commit Log to Database String Stream</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if posts %}
+            {% for post in posts %}
+                <article class="blog-post">
+                    <div class="blog-meta">POST_REF: #{{ post.id }} // FILE_ATTACHED: {{ post.image_name if post.image_name else 'NONE' }} // UTC: {{ post.date_posted.strftime('%Y-%m-%d %H:%M') }}</div>
+                    
+                    <h2 class="blog-title">{{ post.title }}</h2>
+                    <div class="blog-content">{{ post.content }}</div>
+                    
+                    {% if post.image_base64 %}
+                        <img src="data:image/jpeg;base64,{{ post.image_base64 }}" class="blog-img" alt="Evidence snapshot alignment">
+                    {% endif %}
+
+                    {% if is_admin %}
+                        <form method="POST" action="{{ url_for('delete_entry', post_id=post.id) }}">
+                            <button type="submit" class="del-btn">Purge #{{ post.id }}</button>
+                        </form>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px; border: 1px dashed #222; border-radius: 6px;">No structural log elements deployed into tracking database streams.</div>
+        {% endif %}
+    </div>
+
+    <div id="about-view" class="view-panel">
+        <div class="about-card">
+            <h3>RESEARCHER IDENTITY STRUCT</h3>
+            <p>Hello, I'm <span style="color:var(--text-green);">Anshu Vishwakarma</span>, a BCA Graduate and Application Security Researcher.</p>
+            <p>This sandbox layout utilizes zero exposed administrative directories. Privilege allocation runs through strict backend cookie matching states.</p>
+        </div>
+    </div>
+
+    <footer class="secure-footer">
+        <span>// SECURE LINK MATRIX // </span>
+        <a href="mailto:your.email@gmail.com" class="footer-link">[ Gmail ]</a>
+        <a href="https://github.com/bugve" target="_blank" class="footer-link">[ GitHub ]</a>
+    </footer>
+
+</div>
+
+<script>
+    function switchTab(viewId) {
+        document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if(viewId === 'terminal-view') document.getElementById('cmdInput').focus();
+    }
+
+    const cmdInput = document.getElementById('cmdInput');
+    const history = document.getElementById('history');
+    const terminalBody = document.getElementById('terminalBody');
+
+    if (cmdInput) {
+        cmdInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const input = cmdInput.value.trim();
+                if (input === '') return;
+
+                // 🕵️‍♀️ SHOULDER-SURFING MITIGATION LAYER
+                let maskedDisplay = input;
+                if (input.toLowerCase().startsWith('su')) {
+                    maskedDisplay = 'auth ' + '*'.repeat(input.length - 5);
+                }
+
+                const echo = document.createElement('div');
+                echo.innerHTML = `<span style="color:#8833ff; font-weight:bold;">guest@bugfolio:~$</span> ${escapeHTML(maskedDisplay)}`;
+                history.appendChild(echo);
+                cmdInput.value = '';
+
+                if (input.toLowerCase() === 'clear') {
+                    history.innerHTML = '';
+                    return;
+                }
+
+                fetch('/api/terminal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: input })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const response = document.createElement('div');
+                    response.style.margin = "4px 0 12px 0";
+                    response.innerHTML = data.output;
+                    history.appendChild(response);
+                    terminalBody.scrollTop = terminalBody.scrollHeight;
+
+                    // Trigger direct interface transformation upon privilege authorization
+                    if (data.authenticated) {
+                        setTimeout(() => { window.location.reload(); }, 1200);
+                    }
+                });
+            }
+        });
+    }
+
+    function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+    }
+    if (terminalBody) terminalBody.addEventListener('click', () => cmdInput.focus());
+</script>
+</body>
+</html>
